@@ -1,33 +1,25 @@
 import express from "express"
-import userModel from "../model/user.model.js";
-import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken"
 import blogModel from "../model/blog.model.js";
 
 const blogRoutes = express.Router()
 
 
 
-
-blogRoutes.route("/get-blog").get(async (req, res) => {
-
+blogRoutes.route("/get-blog").get(async (_, res) => {
     try {
         const blog = await blogModel.find({}).limit(50);
 
         return res.send({ success: true, blog }).status(200)
     } catch (error) {
-        console.log(error)
         return res.send({ success: false }).status(404)
     }
 })
 
 
 
-
 blogRoutes.route("/get-blogs/:userName").get(async (req, res) => {
     try {
         const userName = req.params.userName;
-        console.log(userName)
 
         if (userName == undefined || userName == "")
             return res.send({ success: false }).status(404)
@@ -36,12 +28,9 @@ blogRoutes.route("/get-blogs/:userName").get(async (req, res) => {
 
         return res.send({ success: true, blog }).status(200)
     } catch (error) {
-        console.log(error)
         return res.send({ success: false }).status(404)
     }
 })
-
-
 
 
 
@@ -64,15 +53,13 @@ blogRoutes.route("/add-blog").post(async (req, res) => {
 
         return res.send({ success: true, message: "Blog added" }).status(200)
     } catch (error) {
-        console.log(error)
         return res.send({ success: false }).status(404)
     }
 })
 
 
 
-blogRoutes.route("/delete-blog/:id").get(async (req, res) => {
-
+blogRoutes.route("/delete-blog/:id").delete(async (req, res) => {
     const id = req.params.id;
 
     try {
@@ -83,7 +70,6 @@ blogRoutes.route("/delete-blog/:id").get(async (req, res) => {
 
         return res.send({ success: true, message: "Blog deleted" }).status(200)
     } catch (error) {
-        console.log(error)
         return res.send({ success: false }).status(404)
     }
 })

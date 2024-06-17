@@ -7,7 +7,6 @@ const authRoutes = express.Router()
 
 
 
-
 authRoutes.route("/signin").post(async (req, res) => {
     try {
         const { firstName, lastName, email, password, image, about, userName } = req.body;
@@ -23,25 +22,17 @@ authRoutes.route("/signin").post(async (req, res) => {
         )
             return res.send({ success: false }).status(404)
 
-        bcrypt.genSalt(10, function (err, salt) {
-            bcrypt.hash(password, salt, async function (err, hash) {
+        bcrypt.genSalt(10, function (_, salt) {
+            bcrypt.hash(password, salt, async function (_, hash) {
                 await userModel.create({ firstName, lastName, email, password: hash, image, about, userName })
             });
         });
 
         return res.send({ success: true, message: "User Created" }).status(200)
-
     } catch (error) {
-        console.log(error)
         return res.send({ success: false }).status(404)
     }
 })
-
-
-
-
-
-
 
 
 
@@ -63,7 +54,7 @@ authRoutes.route("/login").post(async (req, res) => {
             if (passwordMatch) {
                 const token = jwt.sign(
                     { email: email },
-                    "star",
+                    process.env.JWT_SECRET,
                     { expiresIn: "3d" }
                 );
 
@@ -74,20 +65,15 @@ authRoutes.route("/login").post(async (req, res) => {
                     data: { auth: { token, email }, user: u },
                     message: "User login successfully"
                 }).status(200);
-            } else {
+            } else
                 return res.send({ success: false });
-            }
         }
-        else {
+        else
             return res.send({ success: false, message: "No user found" }).status(404)
-        }
     } catch (error) {
-        console.log("")
         return res.send({ success: false }).status(404)
     }
 })
-
-
 
 
 
@@ -100,32 +86,26 @@ authRoutes.route("/validate-token").post(async (req, res) => {
             email == undefined || email == ""
         ) return res.send({ success: false }).status(404)
 
-        const a = jwt.verify(token, "star");
+        const a = jwt.verify(token, process.env.JWT_SECRET);
 
         if (a.email === email) {
             const user = await userModel.findOne({ email })
 
             return res.send({ success: true, user, message: "Token Verified" }).status(200)
         }
-        else {
+        else
             return res.send({ success: false, message: "Invalid Token" }).status(404)
-        }
     }
     catch (err) {
-        console.log(err)
         return res.send({ success: false, message: "Invalid Token" }).status(404)
     }
 })
 
 
 
-
-
 authRoutes.route("/validate-cred").post(async (req, res) => {
     try {
         const { userName, email } = req.body;
-
-        console.log(userName, email)
 
         if (
             userName == undefined || userName == "" |
@@ -140,22 +120,15 @@ authRoutes.route("/validate-cred").post(async (req, res) => {
             ]
         })
 
-        if (user.length == 0) {
-            console.log(user)
+        if (user.length == 0)
             return res.send({ success: true }).status(200)
-        }
-        else {
+        else
             return res.send({ success: false }).status(404)
-        }
     }
     catch (err) {
-        console.log(err)
-
         return res.send({ success: false }).status(404)
     }
 })
-
-
 
 
 
